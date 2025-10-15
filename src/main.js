@@ -1,19 +1,41 @@
-import { appState } from './state/appState.js';
-import { SceneCanvasComponent } from './components/SceneCanvas.js';
-import { PropertiesPanelComponent } from './components/PropertiesPanel.js';
-import { PromptPreviewComponent } from './components/PromptPreview.js';
+import "./styles/input.css";
+import { initializeCanvas } from "./components/SceneCanvas.js";
+import { initializePropertiesPanel } from "./components/PropertiesPanel.js";
+import { initializeModals, showModal, hideModal, addClipToUI } from "./ui/components.js";
+import { generateImage } from "./api/gemini.js";
 
-document.addEventListener('DOMContentLoaded', () => {
-  // --- DOM Elements ---
-  const canvasContainer = document.getElementById('canvas-container');
-  const propertiesPanel = document.getElementById('properties-panel');
-  const promptPreview = document.getElementById('prompt-preview');
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize all UI components
+  initializeCanvas();
+  initializePropertiesPanel();
+  initializeModals();
 
-  // --- Initial Setup ---
-  SceneCanvasComponent(canvasContainer);
-  PropertiesPanelComponent(propertiesPanel);
-  PromptPreviewComponent(promptPreview);
+  // Main "Generate Video" button logic
+  const generateVideoBtn = document.getElementById("generateVideoBtn");
+  const aiPromptTextarea = document.getElementById("aiPrompt");
+  const sceneNameInput = document.getElementById("sceneName");
 
-  console.log('Sora Studio 2D Scene Composer initialized');
-  console.log('Initial state:', appState);
+  generateVideoBtn.addEventListener("click", async () => {
+    const sceneName = sceneNameInput.value.trim();
+    const prompt = aiPromptTextarea.value.trim();
+
+    if (!prompt) {
+      showModal("Error", false, "El prompt de la IA no puede estar vacío. Por favor, genera un prompt primero.");
+      return;
+    }
+
+    generateVideoBtn.disabled = true;
+    showModal(`Generando: "${sceneName}"`);
+
+    try {
+      const imageUrl = await generateImage(prompt);
+      addClipToUI(imageUrl, sceneName);
+      hideModal();
+    } catch (error) {
+      console.error("Error generating video:", error);
+      showModal("Error de Generación", false, "No se pudo generar el video. Intenta de nuevo más tarde.");
+    } finally {
+      generateVideoBtn.disabled = false;
+    }
+  });
 });
