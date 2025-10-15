@@ -1,19 +1,18 @@
-// --- App State ---
-export const state = {
-  selectedStyle: null,
-  selectedModel: null,
+export const appState = {
+  character: {
+    name: 'human',
+    type: 'human',
+    action: 'sitting',
+    emotion: 'neutral',
+    position: { x: 250, y: 250 },
+  },
+  camera: {
+    lens: '35mm',
+    movement: 'static',
+    duration: '10s',
+    position: { x: 550, y: 250 },
+  },
+  scene: {
+    environment: 'interior',
+  },
 };
-
-// --- Models ---
-export const models = [
-  {
-    id: "gemini-2.5-pro",
-    name: "2.5 Pro",
-    description: "Razonamiento, matemáticas y código",
-  },
-  {
-    id: "gemini-2.5-flash",
-    name: "2.5 Flash",
-    description: "Ayuda veloz y versátil",
-  },
-];
