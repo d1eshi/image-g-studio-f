@@ -1,0 +1,109 @@
+{
+  "guideline": {
+    "name": "Sora Studio - Light Mode",
+    "version": "1.0.0",
+    "mood": "Artística, creativa, limpia.",
+    "visualFocus": "El espacio de trabajo (editor) debe sentirse como un canvas donde se crean ideas, no como un panel de control técnico.",
+    "references": [
+      "Runway ML (light UI)",
+      "Midjourney web",
+      "Notion minimal UI"
+    ]
+  },
+  "palette": {
+    "description": "El color principal es el blanco cálido (#F9F9F9), con contraste suave y uso moderado del azul como color de acción.",
+    "colors": {
+      "background": "#F9F9F9",
+      "surface": "#FFFFFF",
+      "border": "#E5E5E5",
+      "textPrimary": "#1E1E1E",
+      "textSecondary": "#6B6B6B",
+      "accent": "#3B82F6",
+      "accentLight": "#EFF6FF",
+      "muted": "#F2F2F2",
+      "highlight": "#FDFDFD"
+    }
+  },
+  "typography": {
+    "fontFamily": "Inter, sans-serif",
+    "weights": [400, 500, 600],
+    "scale": [
+      {
+        "element": "h1",
+        "size": "1.875rem",
+        "tailwindClass": "text-3xl font-semibold"
+      },
+      {
+        "element": "h2",
+        "size": "1.25rem",
+        "tailwindClass": "text-xl font-medium"
+      },
+      {
+        "element": "label",
+        "size": "0.875rem",
+        "tailwindClass": "text-sm text-gray-600"
+      },
+      {
+        "element": "body",
+        "size": "1rem",
+        "tailwindClass": "text-base text-gray-800"
+      }
+    ]
+  },
+  "layout": {
+    "description": "Grilla principal con barra superior, panel izquierdo y canvas/editor a la derecha. El canvas ocupa el foco principal, con paneles laterales planos y limpios, sin sombras ni gradientes.",
+    "baseStructure": "<div class=\"min-h-screen bg-background text-text-primary font-inter flex flex-col\">\n  <header class=\"border-b border-border bg-surface px-6 py-3 flex items-center justify-between\">\n    <h1 class=\"text-xl font-semibold\">Sora Studio</h1>\n    <button class=\"px-3 py-1.5 bg-accent text-white rounded-md text-sm\">Generate</button>\n  </header>\n  <div class=\"flex flex-1\">\n    <aside class=\"w-72 border-r border-border bg-surface p-4 overflow-y-auto\">\n      <!-- Propiedades del personaje, cámara, etc -->\n    </aside>\n    <main class=\"flex-1 bg-muted p-6\">\n      <!-- Canvas / escena -->\n    </main>\n  </div>\n</div>"
+  },
+  "components": {
+    "panelContainer": {
+      "name": "Panel Container",
+      "structure": "<div class=\"bg-surface border border-border rounded-lg p-4 space-y-2\">\n  <h2 class=\"text-sm font-medium text-gray-700 uppercase tracking-wide\">Character</h2>\n  <!-- Contenido -->\n</div>"
+    },
+    "inputGroup": {
+      "name": "Input Group",
+      "structure": "<div class=\"space-y-1\">\n  <label class=\"text-sm text-gray-600\">Emotion</label>\n  <select class=\"w-full border border-border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent\">\n    <option>Happy</option>\n  </select>\n</div>"
+    },
+    "button": {
+      "name": "Button",
+      "structure": "<button class=\"px-3 py-1.5 bg-accent text-white rounded-md text-sm hover:bg-blue-600 transition-colors\">Generate prompt</button>"
+    },
+    "sectionTitle": {
+      "name": "Section Title",
+      "structure": "<h2 class=\"text-sm font-semibold text-gray-700 uppercase tracking-wide border-b border-border pb-1\">Camera</h2>"
+    }
+  },
+  "editorCanvas": {
+    "description": "El canvas debe ser plano, minimalista, sin textura ni sombras.",
+    "background": "#F3F3F3 con grid sutil.",
+    "structure": "<canvas class=\"w-full h-full bg-[#F3F3F3] rounded-md border border-border\"></canvas>",
+    "visualIndicators": {
+      "character": "Círculo sólido (fill: #3B82F6) con nombre debajo.",
+      "camera": "Triángulo o icono minimalista (stroke: #1E1E1E).",
+      "connectionLine": "Línea gris (stroke: #C4C4C4)."
+    }
+  },
+  "generatedVideoCards": {
+    "name": "Generated Video Cards",
+    "structure": "<div class=\"grid grid-cols-2 gap-4 mt-4\">\n  <div class=\"bg-surface border border-border rounded-lg overflow-hidden\">\n    <div class=\"aspect-video bg-gray-200\"></div>\n    <div class=\"p-2\">\n      <p class=\"text-sm font-medium text-gray-800\">Sunset Meditation</p>\n      <p class=\"text-xs text-gray-500\">10s - Cinematic</p>\n    </div>\n  </div>\n</div>"
+  },
+  "spacing": {
+    "internalPadding": "p-4",
+    "sectionMargin": "mb-6",
+    "inputSpacing": "space-y-3",
+    "borderRadius": "rounded-md",
+    "dividers": "border-border"
+  },
+  "animations": {
+    "description": "Sin animaciones, solo feedback visual sutil.",
+    "allowedClasses": [
+      "transition-colors",
+      "duration-150",
+      "ease-in-out",
+      "focus:ring-1",
+      "focus:ring-accent"
+    ],
+    "forbidden": "Nada de motion, hover movement o blur dinámico."
+  },
+  "overallTone": "Debe sentirse como un espacio para crear, no para configurar. Paneles claros y aireados. El color se usa solo para acciones principales y elementos activos. El canvas siempre debe dominar visualmente.",
+  "futureEvolution": "Este layout permite agregar en el futuro: Tabs superiores (Scene / Prompt / Output), panel flotante para cámara (tipo inspector) y un editor 3D con three.js manteniendo la misma estructura visual."
+}
