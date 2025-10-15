@@ -14,6 +14,9 @@ module.exports = {
         muted: "var(--muted)",
         highlight: "var(--highlight)",
       },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],
