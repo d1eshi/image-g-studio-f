@@ -1,0 +1,15 @@
+{
+  "name": "sora-studio-sf",
+  "version": "1.0.0",
+  "description": "Turn ideas into cinematic Sora 2 videos instantly",
+  "main": "src/script.js",
+  "scripts": {
+    "start": "http-server src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bun": "^1.3.0"
+  }
+}

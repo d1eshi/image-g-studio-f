@@ -1,0 +1,108 @@
+{
+  "app": {
+    "name": "Sora Studio",
+    "theme": "light",
+    "layout": {
+      "type": "vertical",
+      "align": "center",
+      "maxWidth": "700px",
+      "padding": "2rem"
+    },
+    "sections": [
+      {
+        "id": "header",
+        "type": "header",
+        "content": {
+          "title": "Sora Studio",
+          "subtitle": "Turn ideas into cinematic Sora 2 videos instantly"
+        },
+        "style": {
+          "marginBottom": "2rem",
+          "textAlign": "center"
+        }
+      },
+      {
+        "id": "ideaInput",
+        "type": "form",
+        "elements": [
+          {
+            "type": "textarea",
+            "id": "idea",
+            "label": "Your video idea",
+            "placeholder": "Describe your scene or concept...",
+            "rows": 4
+          },
+          {
+            "type": "group",
+            "label": "Select style",
+            "id": "templates",
+            "options": [
+              { "id": "cinematic", "label": "🎬 Cinematic" },
+              { "id": "commercial", "label": "💼 Commercial" },
+              { "id": "short", "label": "📱 Short" },
+              { "id": "educational", "label": "📖 Educational" }
+            ],
+            "selectionType": "single"
+          },
+          {
+            "type": "button",
+            "id": "generatePrompt",
+            "label": "Generate prompt",
+            "variant": "primary"
+          }
+        ]
+      },
+      {
+        "id": "promptPreview",
+        "type": "panel",
+        "title": "Prompt preview",
+        "content": {
+          "type": "text",
+          "bind": "prompt"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "id": "editPrompt",
+            "label": "Edit"
+          },
+          {
+            "type": "button",
+            "id": "generateVideo",
+            "label": "Generate video",
+            "variant": "success"
+          }
+        ]
+      },
+      {
+        "id": "gallery",
+        "type": "grid",
+        "title": "Generated videos",
+        "columns": 2,
+        "items": {
+          "type": "videoCard",
+          "bind": "videos",
+          "props": {
+            "thumbnail": "previewUrl",
+            "videoUrl": "url",
+            "title": "title",
+            "timestamp": "createdAt"
+          }
+        }
+      },
+      {
+        "id": "footer",
+        "type": "footer",
+        "content": {
+          "text": "Made with ❤️ using n8n + HTML/CSS/JS"
+        },
+        "style": {
+          "marginTop": "2rem",
+          "textAlign": "center",
+          "fontSize": "0.9rem",
+          "color": "#666"
+        }
+      }
+    ]
+  }
+}

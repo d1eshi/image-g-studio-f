@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sora Studio</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Sora Studio</h1>
+        <p>Turn ideas into cinematic Sora 2 videos instantly</p>
+      </header>
+      <main>
+        <section id="ideaInput" class="card">
+          <h2>Your video idea</h2>
+          <form>
+            <div id="modelSelectorContainer"></div>
+            <textarea
+              id="idea"
+              placeholder="Describe your scene or concept..."
+              rows="4"
+            ></textarea>
+            <div class="options-group">
+              <label>Select style</label>
+              <div class="options">
+                <button type="button" class="option" data-style="cinematic">
+                  🎬 Cinematic
+                </button>
+                <button type="button" class="option" data-style="commercial">
+                  💼 Commercial
+                </button>
+                <button type="button" class="option" data-style="short">
+                  📱 Short
+                </button>
+                <button type="button" class="option" data-style="educational">
+                  📖 Educational
+                </button>
+              </div>
+            </div>
+            <button type="submit" id="generatePrompt" class="btn btn-primary">
+              Generate prompt
+            </button>
+          </form>
+        </section>
+        <section id="promptPreview" class="card" style="display: none">
+          <h2>Prompt preview</h2>
+          <div class="prompt-text"></div>
+          <div class="actions">
+            <button type="button" id="editPrompt" class="btn">Edit</button>
+            <button type="button" id="generateVideo" class="btn btn-success">
+              Generate video
+            </button>
+          </div>
+        </section>
+        <section id="gallery">
+          <h2>Generated videos</h2>
+          <div class="grid"></div>
+        </section>
+      </main>
+      <footer>
+        <p>Made with ❤️ by d1eshi</p>
+      </footer>
+    </div>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
