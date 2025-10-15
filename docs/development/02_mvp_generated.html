@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sora Studio con Gemini</title>
+    <!-- Chosen Palette: Sora Studio Light Mode -->
+    <!-- Application Structure Plan: The application uses a three-part layout (Top Bar, Left Panel, Main Canvas) as defined in the source report. This structure is ideal for a creative tool like a video editor because it separates global actions (Top Bar) from specific controls/properties (Left Panel), while maximizing the screen real estate for the primary workspace (Main Canvas). This user flow allows creators to focus on the visual scene while having necessary tools readily accessible without clutter. Interaction is focused on direct manipulation of elements on the canvas (dragging camera/character) for an intuitive, artistic feel. A new AI-powered prompt generator was added to the left panel to enhance the creative workflow. A modal was added to provide feedback during the video generation process. A second modal now acts as a "video player" to view generated clips. -->
+    <!-- Visualization & Content Choices: Report Info: The core of the app is the 'Editor Canvas'. Goal: Provide a visual, interactive workspace. Viz/Presentation Method: An HTML <canvas> element is used for 2D drawing. Interaction: Users can click and drag the 'Character' (blue circle) and 'Camera' (triangle) elements. The canvas redraws in real-time to reflect new positions. Justification: A canvas provides the necessary flexibility for a creative, freeform editor. Library/Method: Vanilla JavaScript. The left panel uses standard HTML forms to represent properties. A feature uses the Gemini API to generate a detailed cinematic prompt. Another feature uses the Gemini API (imagen-3.0-generate-002) to generate a visual representation (image) of the prompt, simulating video creation and displaying it in a new 'clip' card. These clip cards are now clickable, opening a larger player-like modal to view the result. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --background: #f9f9f9;
+        --surface: #ffffff;
+        --border: #e5e5e5;
+        --text-primary: #1e1e1e;
+        --text-secondary: #6b6b6b;
+        --accent: #3b82f6;
+        --accent-light: #eff6ff;
+        --muted: #f2f2f2;
+        --highlight: #fdfdfd;
+        --canvas-bg: #f3f3f3;
+        --connection-line: #c4c4c4;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--background);
+        color: var(--text-primary);
+      }
+      .canvas-grid {
+        background-color: var(--canvas-bg);
+        background-image:
+          linear-gradient(var(--border) 1px, transparent 1px),
+          linear-gradient(to right, var(--border) 1px, var(--canvas-bg) 1px);
+        background-size: 20px 20px;
+      }
+      textarea::placeholder {
+        color: #9ca3af;
+      }
+      .loader {
+        border: 4px solid var(--accent-light);
+        border-top: 4px solid var(--accent);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .clip-card {
+        cursor: pointer;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: "var(--background)",
+              surface: "var(--surface)",
+              border: "var(--border)",
+              "text-primary": "var(--text-primary)",
+              "text-secondary": "var(--text-secondary)",
+              accent: "var(--accent)",
+              "accent-light": "var(--accent-light)",
+              muted: "var(--muted)",
+              highlight: "var(--highlight)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="min-h-screen antialiased">
+    <!-- Generation Modal -->
+    <div
+      id="modal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-surface rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 id="modalTitle" class="text-lg font-medium text-text-primary mb-4">
+          Generando...
+        </h3>
+        <div
+          id="modalContent"
+          class="flex flex-col items-center justify-center"
+        >
+          <div class="loader"></div>
+          <p id="modalText" class="mt-4 text-text-secondary">
+            Tu video se está procesando. Esto puede tardar unos momentos.
+          </p>
+        </div>
+        <div id="modalActions" class="mt-4 text-right hidden">
+          <button
+            id="closeModalBtn"
+            class="px-4 py-2 bg-accent text-white rounded-md text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div
+      id="videoPlayerModal"
+      class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden p-4 transition-opacity duration-300"
+    >
+      <div
+        class="bg-surface rounded-lg shadow-xl w-full max-w-4xl aspect-video relative flex flex-col overflow-hidden"
+      >
+        <header
+          class="p-3 border-b border-border flex items-center justify-between flex-shrink-0 bg-highlight"
+        >
+          <h3
+            id="videoPlayerTitle"
+            class="text-base font-medium text-text-primary"
+          >
+            Video Title
+          </h3>
+          <button
+            id="closeVideoPlayerBtn"
+            class="text-text-secondary hover:text-text-primary text-2xl leading-none font-bold"
+          >
+            &times;
+          </button>
+        </header>
+        <div class="flex-grow bg-black flex items-center justify-center p-1">
+          <img
+            id="videoPlayerImage"
+            src=""
+            alt="Generated clip"
+            class="max-w-full max-h-full object-contain"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="min-h-screen flex flex-col">
+      <header
+        class="border-b border-border bg-surface px-6 py-3 flex items-center justify-between flex-shrink-0"
+      >
+        <h1 class="text-xl font-semibold text-text-primary">Sora Studio ✨</h1>
+        <button
+          id="generateVideoBtn"
+          class="px-4 py-2 bg-accent text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Generate Video
+        </button>
+      </header>
+
+      <div class="flex flex-1 overflow-hidden">
+        <aside
+          class="w-80 border-r border-border bg-surface p-4 overflow-y-auto flex-shrink-0 space-y-6"
+        >
+          <div class="bg-surface rounded-lg space-y-4">
+            <h2
+              class="text-sm font-semibold text-text-secondary uppercase tracking-wide border-b border-border pb-2"
+            >
+              Scene
+            </h2>
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <label for="sceneName" class="text-sm text-text-secondary"
+                  >Scene Name</label
+                >
+                <input
+                  id="sceneName"
+                  type="text"
+                  value="Desert Sunset"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                />
+              </div>
+              <div class="space-y-1">
+                <label for="sceneStyle" class="text-sm text-text-secondary"
+                  >Style</label
+                >
+                <select
+                  id="sceneStyle"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                >
+                  <option>Cinematic</option>
+                  <option>Anime</option>
+                  <option>Documentary</option>
+                  <option>Pixel Art</option>
+                  <option>Vaporwave</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-surface rounded-lg space-y-4">
+            <h2
+              class="text-sm font-semibold text-text-secondary uppercase tracking-wide border-b border-border pb-2"
+            >
+              Character
+            </h2>
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <label for="charModel" class="text-sm text-text-secondary"
+                  >Model</label
+                >
+                <select
+                  id="charModel"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                >
+                  <option>Man with Hat</option>
+                  <option>Woman in Red Dress</option>
+                  <option>Robot Assistant</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label for="charEmotion" class="text-sm text-text-secondary"
+                  >Emotion</label
+                >
+                <select
+                  id="charEmotion"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                >
+                  <option>Neutral</option>
+                  <option>Happy</option>
+                  <option>Sad</option>
+                  <option>Pensive</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label for="charAction" class="text-sm text-text-secondary"
+                  >Action</label
+                >
+                <input
+                  id="charAction"
+                  type="text"
+                  value="Walking slowly"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-surface rounded-lg space-y-4">
+            <h2
+              class="text-sm font-semibold text-text-secondary uppercase tracking-wide border-b border-border pb-2"
+            >
+              Camera
+            </h2>
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <label for="cameraShot" class="text-sm text-text-secondary"
+                  >Shot Type</label
+                >
+                <select
+                  id="cameraShot"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                >
+                  <option>Medium Shot</option>
+                  <option>Close Up</option>
+                  <option>Long Shot</option>
+                  <option>Dutch Angle</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label for="cameraMovement" class="text-sm text-text-secondary"
+                  >Movement</label
+                >
+                <select
+                  id="cameraMovement"
+                  class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                >
+                  <option>Static</option>
+                  <option>Pan Left</option>
+                  <option>Dolly In</option>
+                  <option>Crane Up</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-surface rounded-lg space-y-4">
+            <h2
+              class="text-sm font-semibold text-text-secondary uppercase tracking-wide border-b border-border pb-2"
+            >
+              ✨ AI Prompt Generator
+            </h2>
+            <div class="space-y-3">
+              <p class="text-sm text-text-secondary">
+                Usa la IA para expandir tus ideas en un prompt detallado y listo
+                para generar.
+              </p>
+              <textarea
+                id="aiPrompt"
+                rows="6"
+                class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-150 ease-in-out bg-white"
+                placeholder="El prompt generado por la IA aparecerá aquí..."
+              ></textarea>
+              <button
+                id="generatePromptBtn"
+                class="w-full px-4 py-2 bg-accent-light text-accent rounded-md text-sm font-medium hover:bg-blue-200 transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ✨ Sugerir Prompt Detallado
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <main class="flex-1 bg-muted p-6 flex flex-col overflow-y-auto">
+          <div
+            class="w-full h-full bg-surface rounded-md border border-border flex-grow relative"
+          >
+            <canvas
+              id="editorCanvas"
+              class="w-full h-full canvas-grid rounded-md"
+            ></canvas>
+          </div>
+          <div class="pt-6">
+            <h3 class="text-lg font-medium text-text-primary mb-3">
+              Generated Clips
+            </h3>
+            <div
+              id="clipsContainer"
+              class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            ></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById("editorCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const character = {
+          x: 200,
+          y: 250,
+          radius: 20,
+          color: "var(--accent)",
+          label: "Character",
+        };
+        const camera = {
+          x: 450,
+          y: 250,
+          size: 30,
+          color: "var(--text-primary)",
+          label: "Camera",
+        };
+        let dragging = null;
+        let dragOffsetX, dragOffsetY;
+
+        function resizeCanvas() {
+          const parent = canvas.parentElement;
+          canvas.width = parent.clientWidth;
+          canvas.height = parent.clientHeight;
+          draw();
+        }
+
+        function drawCamera(x, y, size) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x, y - size / 2);
+          ctx.lineTo(x - size, y + size / 2);
+          ctx.lineTo(x + size, y + size / 2);
+          ctx.closePath();
+          ctx.strokeStyle = camera.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        function drawCharacter(x, y, radius) {
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = character.color;
+          ctx.fill();
+        }
+
+        function drawConnectionLine() {
+          ctx.beginPath();
+          ctx.moveTo(character.x, character.y);
+          ctx.lineTo(camera.x, camera.y);
+          ctx.strokeStyle = "var(--connection-line)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        function drawLabels() {
+          ctx.fillStyle = "var(--text-secondary)";
+          ctx.font = "12px Inter";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            character.label,
+            character.x,
+            character.y + character.radius + 15,
+          );
+          ctx.fillText(camera.label, camera.x, camera.y + camera.size / 2 + 15);
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          drawConnectionLine();
+          drawCamera(camera.x, camera.y, camera.size);
+          drawCharacter(character.x, character.y, character.radius);
+          drawLabels();
+        }
+
+        function getMousePos(evt) {
+          const rect = canvas.getBoundingClientRect();
+          return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+        }
+
+        function isMouseOverCharacter(pos) {
+          const dx = pos.x - character.x;
+          const dy = pos.y - character.y;
+          return dx * dx + dy * dy < character.radius * character.radius;
+        }
+
+        function isMouseOverCamera(pos) {
+          const halfSize = camera.size;
+          return (
+            pos.x > camera.x - halfSize &&
+            pos.x < camera.x + halfSize &&
+            pos.y > camera.y - camera.size / 2 &&
+            pos.y < camera.y + camera.size / 2
+          );
+        }
+
+        canvas.addEventListener("mousedown", (e) => {
+          const pos = getMousePos(e);
+          if (isMouseOverCharacter(pos)) {
+            dragging = character;
+          } else if (isMouseOverCamera(pos)) {
+            dragging = camera;
+          }
+          if (dragging) {
+            dragOffsetX = pos.x - dragging.x;
+            dragOffsetY = pos.y - dragging.y;
+          }
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+          const pos = getMousePos(e);
+          if (dragging) {
+            dragging.x = pos.x - dragOffsetX;
+            dragging.y = pos.y - dragOffsetY;
+            draw();
+          }
+          canvas.style.cursor =
+            isMouseOverCharacter(pos) || isMouseOverCamera(pos)
+              ? "grab"
+              : "default";
+        });
+
+        canvas.addEventListener("mouseup", () => {
+          dragging = null;
+          canvas.style.cursor = "default";
+        });
+
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        const generatePromptBtn = document.getElementById("generatePromptBtn");
+        const aiPromptTextarea = document.getElementById("aiPrompt");
+
+        generatePromptBtn.addEventListener("click", async () => {
+          const sceneName = document.getElementById("sceneName").value;
+          const sceneStyle = document.getElementById("sceneStyle").value;
+          const charModel = document.getElementById("charModel").value;
+          const charEmotion = document.getElementById("charEmotion").value;
+          const charAction = document.getElementById("charAction").value;
+          const cameraShot = document.getElementById("cameraShot").value;
+          const cameraMovement =
+            document.getElementById("cameraMovement").value;
+
+          const systemPrompt =
+            "You are an expert creative director and scriptwriter. Your task is to take a set of simple scene elements and expand them into a rich, detailed, and evocative prompt suitable for an AI video generation model. The prompt should describe the visuals, atmosphere, lighting, and character actions in a cinematic style. Be creative and descriptive.";
+          const userQuery = `Generate a detailed video prompt based on these elements:\n- Scene Name: ${sceneName}\n- Visual Style: ${sceneStyle}\n- Character: ${charModel}\n- Character's Emotion: ${charEmotion}\n- Character's Action: ${charAction}\n- Camera Shot: ${cameraShot}\n- Camera Movement: ${cameraMovement}`;
+
+          generatePromptBtn.disabled = true;
+          generatePromptBtn.textContent = "Generando...";
+          aiPromptTextarea.value = "Contactando a la IA...";
+
+          try {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = {
+              contents: [{ parts: [{ text: userQuery }] }],
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            const response = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+              throw new Error(`API error: ${response.statusText}`);
+            }
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            aiPromptTextarea.value = text
+              ? text
+              : "No se pudo generar un prompt. La respuesta de la IA estaba vacía.";
+          } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            aiPromptTextarea.value = `Error al generar el prompt. Por favor, revisa la consola para más detalles.`;
+          } finally {
+            generatePromptBtn.disabled = false;
+            generatePromptBtn.innerHTML = "✨ Sugerir Prompt Detallado";
+          }
+        });
+
+        const generateVideoBtn = document.getElementById("generateVideoBtn");
+        const modal = document.getElementById("modal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        const modalText = document.getElementById("modalText");
+        const modalActions = document.getElementById("modalActions");
+        const closeModalBtn = document.getElementById("closeModalBtn");
+        const clipsContainer = document.getElementById("clipsContainer");
+
+        const videoPlayerModal = document.getElementById("videoPlayerModal");
+        const videoPlayerTitle = document.getElementById("videoPlayerTitle");
+        const videoPlayerImage = document.getElementById("videoPlayerImage");
+        const closeVideoPlayerBtn = document.getElementById(
+          "closeVideoPlayerBtn",
+        );
+
+        closeModalBtn.addEventListener("click", () =>
+          modal.classList.add("hidden"),
+        );
+
+        function showModal(
+          title,
+          isLoading = true,
+          message = "Tu video se está procesando...",
+        ) {
+          modalTitle.textContent = title;
+          if (isLoading) {
+            modalContent.innerHTML = `<div class="loader"></div>`;
+            modalText.textContent = message;
+            modalText.classList.remove("text-red-500");
+            modalActions.classList.add("hidden");
+          } else {
+            modalContent.innerHTML = ``;
+            modalText.textContent = message;
+            modalText.classList.add("text-red-500");
+            modalActions.classList.remove("hidden");
+          }
+          modal.classList.remove("hidden");
+        }
+
+        function showVideoPlayerModal(imageUrl, sceneName) {
+          videoPlayerTitle.textContent = sceneName;
+          videoPlayerImage.src = imageUrl;
+          videoPlayerModal.classList.remove("hidden");
+        }
+
+        closeVideoPlayerBtn.addEventListener("click", () =>
+          videoPlayerModal.classList.add("hidden"),
+        );
+        videoPlayerModal.addEventListener("click", (e) => {
+          if (e.target === videoPlayerModal) {
+            videoPlayerModal.classList.add("hidden");
+          }
+        });
+
+        function addClipToUI(imageData, sceneName) {
+          const clipEl = document.createElement("div");
+          clipEl.className =
+            "bg-surface border border-border rounded-lg overflow-hidden group clip-card";
+          clipEl.innerHTML = `
+            <div class="aspect-video bg-gray-200 flex items-center justify-center pointer-events-none">
+                <img src="${imageData}" alt="${sceneName}" class="w-full h-full object-cover"/>
+            </div>
+            <div class="p-3 pointer-events-none">
+              <p class="text-sm font-medium text-text-primary truncate">${sceneName}</p>
+              <p class="text-xs text-text-secondary">Justo ahora - AI Generated</p>
+            </div>
+        `;
+          clipEl.addEventListener("click", () => {
+            showVideoPlayerModal(imageData, sceneName);
+          });
+          clipsContainer.prepend(clipEl);
+        }
+
+        generateVideoBtn.addEventListener("click", async () => {
+          const sceneName = document.getElementById("sceneName").value.trim();
+          const prompt = aiPromptTextarea.value.trim();
+
+          if (!prompt) {
+            showModal(
+              "Error",
+              false,
+              "El prompt de la IA no puede estar vacío. Por favor, genera un prompt primero.",
+            );
+            return;
+          }
+
+          generateVideoBtn.disabled = true;
+          showModal(`Generando: "${sceneName}"`);
+
+          try {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+            const payload = {
+              instances: [{ prompt: prompt }],
+              parameters: { sampleCount: 1 },
+            };
+            const response = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+              const errorBody = await response.text();
+              throw new Error(
+                `API error: ${response.statusText}. Body: ${errorBody}`,
+              );
+            }
+
+            const result = await response.json();
+            if (
+              result.predictions &&
+              result.predictions.length > 0 &&
+              result.predictions[0].bytesBase64Encoded
+            ) {
+              const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+              addClipToUI(imageUrl, sceneName);
+              modal.classList.add("hidden");
+            } else {
+              throw new Error(
+                "La respuesta de la API no contenía una imagen válida.",
+              );
+            }
+          } catch (error) {
+            console.error("Error generating video:", error);
+            showModal(
+              "Error de Generación",
+              false,
+              "No se pudo generar el video. Intenta de nuevo más tarde.",
+            );
+          } finally {
+            generateVideoBtn.disabled = false;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
