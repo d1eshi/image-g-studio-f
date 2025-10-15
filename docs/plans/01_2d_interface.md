@@ -1,36 +1,60 @@
 **PLAN DE ACCIÓN: Implementar Interfaz 2D para Compositor de Escenas**
 
 **Objetivo de la Tarea:**
-Desarrollar una interfaz 2D que permita a los usuarios componer una escena visualmente arrastrando un personaje y una cámara, ajustar sus propiedades y generar automáticamente un prompt de texto y un objeto JSON que describan la composición para la API de Sora.
+Desarrollar una interfaz 2D que permita a los usuarios componer una escena visualmente arrastrando un personaje y una cámara, ajustar sus propiedades y generar automáticamente un prompt de texto y un objeto JSON que describan la composición para la API de Sora, utilizando una arquitectura de componentes con Tailwind CSS.
 
-**Pasos a Seguir:**
-1.  **Modificar `index.html`:**
-    *   Añadir un elemento `<canvas>` para la interfaz 2D.
-    *   Crear la estructura del panel de propiedades para el personaje y la cámara.
-    *   Añadir áreas para mostrar el "Prompt Preview" en texto y en formato JSON.
-
-2.  **Modificar `style.css`:**
-    *   Añadir estilos para el layout general, el canvas, y los paneles de propiedades y previsualización, siguiendo un diseño limpio y minimalista.
-
-3.  **Modificar `script.js`:**
-    *   Implementar la lógica para dibujar el personaje y la cámara en el canvas.
-    *   Añadir la funcionalidad de arrastrar y soltar para el personaje y la cámara.
-    *   Implementar la lógica para actualizar las propiedades de la escena (distancia, ángulo) basadas en la posición de los elementos en el canvas.
-    *   Conectar los inputs del panel de propiedades al estado de la aplicación.
-    *   Implementar la función que genera el prompt en texto y el objeto JSON a partir del estado de la aplicación.
-    *   Asegurar que el prompt y el JSON se actualicen automáticamente con cada cambio.
-
-4.  **Modificar `state.js`:**
-    *   Definir y gestionar el estado de la aplicación, incluyendo la posición del personaje y la cámara, y todas las propiedades editables.
+**Arquitectura:**
+*   **Patrón de Componentes:** La UI se divide en componentes (`SceneCanvas`, `PropertiesPanel`, `PromptPreview`).
+*   **CSS:** Se utiliza Tailwind CSS para el estilizado.
+*   **Gestión de Estado:** Un objeto `appState` centralizado con un sistema de publicación/suscripción.
 
 **Archivos Involucrados:**
 *   `src/index.html`
-*   `src/style.css`
-*   `src/script.js`
-*   `src/state.js`
+*   `src/main.js`
+*   `src/state/appState.js`
+*   `src/components/SceneCanvas.js`
+*   `src/components/PropertiesPanel.js`
+*   `src/components/PromptPreview.js`
+*   `tailwind.config.js`
+*   `package.json`
 
-**Razonamiento:**
-Este enfoque divide la implementación en las capas clásicas de una aplicación web (HTML para estructura, CSS para estilo, y JavaScript para lógica y estado), lo que facilita un desarrollo modular y ordenado. Empezar por la estructura HTML, luego el estilo y finalmente la lógica de la aplicación es un flujo de trabajo estándar y eficiente. Separar el estado en `state.js` es crucial para mantener el código limpio y escalable, como se pide en la descripción del desarrollo.
+--- 
 
-**Confirmación Requerida:**
-Por favor, revisa y aprueba este plan para proceder a la codificación (Fase 2).
+### Detalles de Implementación
+
+#### Gestión de Estado (Pub/Sub)
+Para comunicar los cambios de estado entre componentes de forma desacoplada, se implementará un sistema de publicación/suscripción en `appState.js`.
+
+1.  **`subscribers`**: Un array para almacenar las funciones (callbacks) de los componentes que necesitan reaccionar a los cambios.
+2.  **`subscribe(callback)`**: Un método que permite a un componente registrar una función para ser llamada cuando el estado cambie.
+3.  **`publish()`**: Un método que itera sobre todos los `subscribers` y ejecuta sus callbacks.
+4.  **`Proxy` de Estado**: El objeto `appState` será envuelto en un `Proxy` de JavaScript. Este `Proxy` interceptará cualquier modificación al estado (usando el handler `set`), aplicará el cambio y luego llamará a `publish()` automáticamente para notificar a todos los componentes suscritos.
+
+---
+
+### **TO-DO List de Implementación**
+
+#### 1. `SceneCanvasComponent`
+-   [x] Lógica de dibujado para personaje y cámara.
+-   [x] Funcionalidad de arrastrar y soltar (Drag and Drop).
+-   [x] Notificación de actualización de estado (implementar Pub/Sub).
+
+#### 2. `PropertiesPanelComponent`
+-   [x] Escuchar cambios en los inputs del formulario.
+-   [x] Actualizar `appState` cuando un valor cambia.
+-   [x] Suscribirse a cambios del estado para actualizar el panel si es necesario.
+
+#### 3. `PromptPreviewComponent`
+-   [x] Generar el texto del prompt y el JSON a partir de `appState`.
+-   [x] Suscribirse a cambios del estado para actualizar la vista previa automáticamente.
+
+#### 4. Gestión de Estado (`appState.js`)
+-   [x] Implementar un sistema simple de Publicación/Suscripción (Pub/Sub) para que los componentes puedan reaccionar a los cambios de estado.
+
+#### 5. Integración Final
+-   [ ] Asegurar que todos los componentes se comunican y funcionan correctamente.
+-   [ ] Ejecutar el build de Tailwind CSS para producción.
+-   [ ] Realizar una prueba completa del flujo de usuario.
+
+---
+

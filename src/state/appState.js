@@ -1,4 +1,6 @@
-export const appState = {
+const subscribers = [];
+
+const state = {
   character: {
     name: 'human',
     type: 'human',
@@ -16,3 +18,27 @@ export const appState = {
     environment: 'interior',
   },
 };
+
+const handler = {
+  set(target, property, value) {
+    target[property] = value;
+    publish();
+    return true;
+  },
+  get(target, property) {
+    if (typeof target[property] === 'object' && target[property] !== null) {
+      return new Proxy(target[property], handler);
+    }
+    return target[property];
+  },
+};
+
+function publish() {
+  subscribers.forEach((callback) => callback());
+}
+
+export const appState = new Proxy(state, handler);
+
+export function subscribe(callback) {
+  subscribers.push(callback);
+}
