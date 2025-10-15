@@ -6,84 +6,108 @@
     <title>Sora Studio</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>Sora Studio</h1>
-        <p>Turn ideas into cinematic Sora 2 videos instantly</p>
+  <body class="bg-gray-100 text-gray-800 font-sans">
+    <div class="container mx-auto p-4">
+      <header class="text-center my-8">
+        <h1 class="text-4xl font-bold">Sora Studio</h1>
+        <p class="text-lg text-gray-600">2D Scene Composer</p>
       </header>
       <main>
-        <div class="composer-container">
-          <div id="canvas-container">
-            <canvas id="scene-canvas"></canvas>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div id="canvas-container" class="md:col-span-2 bg-white p-4 rounded-lg shadow-md">
+            <canvas id="scene-canvas" class="w-full h-full"></canvas>
           </div>
-          <div id="properties-panel">
-            <div class="properties-section">
-              <h3>Character</h3>
-              <label for="char-name">Name:</label>
-              <input type="text" id="char-name" value="human" />
-              <label for="char-type">Type:</label>
-              <select id="char-type">
-                <option>human</option>
-                <option>robot</option>
-                <option>animal</option>
-              </select>
-              <label for="char-action">Action:</label>
-              <select id="char-action">
-                <option>running</option>
-                <option>talking</option>
-                <option>sitting</option>
-              </select>
-              <label for="char-emotion">Emotion:</label>
-              <select id="char-emotion">
-                <option>happy</option>
-                <option>sad</option>
-                <option>neutral</option>
-              </select>
-            </div>
-            <div class="properties-section">
-              <h3>Camera</h3>
-              <label for="cam-lens">Lens:</label>
-              <select id="cam-lens">
-                <option>24mm</option>
-                <option>35mm</option>
-                <option>85mm</option>
-              </select>
-              <label for="cam-movement">Movement:</label>
-              <select id="cam-movement">
-                <option>static</option>
-                <option>pan</option>
-                <option>dolly</option>
-              </select>
-              <label for="cam-duration">Duration:</label>
-              <select id="cam-duration">
-                <option>5s</option>
-                <option>10s</option>
-                <option>20s</option>
-              </select>
-            </div>
-            <div class="properties-section">
-              <h3>Scene</h3>
-              <label for="scene-environment">Environment:</label>
-              <select id="scene-environment">
-                <option>beach</option>
-                <option>city</option>
-                <option>forest</option>
-                <option>interior</option>
-              </select>
+          <div id="properties-panel" class="bg-white p-4 rounded-lg shadow-md">
+            <div class="space-y-6">
+              <div class="properties-section">
+                <h3 class="text-xl font-semibold mb-2">Character</h3>
+                <div class="space-y-2">
+                  <div>
+                    <label for="char-name" class="block text-sm font-medium text-gray-700">Name:</label>
+                    <input type="text" id="char-name" value="human" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                  </div>
+                  <div>
+                    <label for="char-type" class="block text-sm font-medium text-gray-700">Type:</label>
+                    <select id="char-type" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>human</option>
+                      <option>robot</option>
+                      <option>animal</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="char-action" class="block text-sm font-medium text-gray-700">Action:</label>
+                    <select id="char-action" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>running</option>
+                      <option>talking</option>
+                      <option>sitting</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="char-emotion" class="block text-sm font-medium text-gray-700">Emotion:</label>
+                    <select id="char-emotion" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>happy</option>
+                      <option>sad</option>
+                      <option>neutral</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="properties-section">
+                <h3 class="text-xl font-semibold mb-2">Camera</h3>
+                <div class="space-y-2">
+                  <div>
+                    <label for="cam-lens" class="block text-sm font-medium text-gray-700">Lens:</label>
+                    <select id="cam-lens" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>24mm</option>
+                      <option>35mm</option>
+                      <option>85mm</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="cam-movement" class="block text-sm font-medium text-gray-700">Movement:</label>
+                    <select id="cam-movement" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>static</option>
+                      <option>pan</option>
+                      <option>dolly</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="cam-duration" class="block text-sm font-medium text-gray-700">Duration:</label>
+                    <select id="cam-duration" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>5s</option>
+                      <option>10s</option>
+                      <option>20s</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="properties-section">
+                <h3 class="text-xl font-semibold mb-2">Scene</h3>
+                <div class="space-y-2">
+                  <div>
+                    <label for="scene-environment" class="block text-sm font-medium text-gray-700">Environment:</label>
+                    <select id="scene-environment" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option>beach</option>
+                      <option>city</option>
+                      <option>forest</option>
+                      <option>interior</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div id="prompt-preview">
-          <h3>Prompt Preview</h3>
-          <div id="prompt-text"></div>
-          <pre id="prompt-json"></pre>
+        <div id="prompt-preview" class="mt-8 bg-white p-4 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-2">Prompt Preview</h3>
+          <div id="prompt-text" class="p-4 bg-gray-50 rounded-md text-gray-700"></div>
+          <pre id="prompt-json" class="mt-4 p-4 bg-gray-800 text-white rounded-md overflow-x-auto"></pre>
         </div>
       </main>
-      <footer>
-        <p>Made with ❤️ by d1eshi</p>
+      <footer class="text-center my-8">
+        <p class="text-gray-600">Made with ❤️ by d1eshi</p>
       </footer>
     </div>
-    <script type="module" src="script.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>
