@@ -13,51 +13,72 @@
         <p>Turn ideas into cinematic Sora 2 videos instantly</p>
       </header>
       <main>
-        <section id="ideaInput" class="card">
-          <h2>Your video idea</h2>
-          <form>
-            <div id="modelSelectorContainer"></div>
-            <textarea
-              id="idea"
-              placeholder="Describe your scene or concept..."
-              rows="4"
-            ></textarea>
-            <div class="options-group">
-              <label>Select style</label>
-              <div class="options">
-                <button type="button" class="option" data-style="cinematic">
-                  🎬 Cinematic
-                </button>
-                <button type="button" class="option" data-style="commercial">
-                  💼 Commercial
-                </button>
-                <button type="button" class="option" data-style="short">
-                  📱 Short
-                </button>
-                <button type="button" class="option" data-style="educational">
-                  📖 Educational
-                </button>
-              </div>
-            </div>
-            <button type="submit" id="generatePrompt" class="btn btn-primary">
-              Generate prompt
-            </button>
-          </form>
-        </section>
-        <section id="promptPreview" class="card" style="display: none">
-          <h2>Prompt preview</h2>
-          <div class="prompt-text"></div>
-          <div class="actions">
-            <button type="button" id="editPrompt" class="btn">Edit</button>
-            <button type="button" id="generateVideo" class="btn btn-success">
-              Generate video
-            </button>
+        <div class="composer-container">
+          <div id="canvas-container">
+            <canvas id="scene-canvas"></canvas>
           </div>
-        </section>
-        <section id="gallery">
-          <h2>Generated videos</h2>
-          <div class="grid"></div>
-        </section>
+          <div id="properties-panel">
+            <div class="properties-section">
+              <h3>Character</h3>
+              <label for="char-name">Name:</label>
+              <input type="text" id="char-name" value="human" />
+              <label for="char-type">Type:</label>
+              <select id="char-type">
+                <option>human</option>
+                <option>robot</option>
+                <option>animal</option>
+              </select>
+              <label for="char-action">Action:</label>
+              <select id="char-action">
+                <option>running</option>
+                <option>talking</option>
+                <option>sitting</option>
+              </select>
+              <label for="char-emotion">Emotion:</label>
+              <select id="char-emotion">
+                <option>happy</option>
+                <option>sad</option>
+                <option>neutral</option>
+              </select>
+            </div>
+            <div class="properties-section">
+              <h3>Camera</h3>
+              <label for="cam-lens">Lens:</label>
+              <select id="cam-lens">
+                <option>24mm</option>
+                <option>35mm</option>
+                <option>85mm</option>
+              </select>
+              <label for="cam-movement">Movement:</label>
+              <select id="cam-movement">
+                <option>static</option>
+                <option>pan</option>
+                <option>dolly</option>
+              </select>
+              <label for="cam-duration">Duration:</label>
+              <select id="cam-duration">
+                <option>5s</option>
+                <option>10s</option>
+                <option>20s</option>
+              </select>
+            </div>
+            <div class="properties-section">
+              <h3>Scene</h3>
+              <label for="scene-environment">Environment:</label>
+              <select id="scene-environment">
+                <option>beach</option>
+                <option>city</option>
+                <option>forest</option>
+                <option>interior</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="prompt-preview">
+          <h3>Prompt Preview</h3>
+          <div id="prompt-text"></div>
+          <pre id="prompt-json"></pre>
+        </div>
       </main>
       <footer>
         <p>Made with ❤️ by d1eshi</p>

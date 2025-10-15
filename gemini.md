@@ -2,4 +2,4 @@
 
 - Inicia cuálquier desarrollo de UI, leyendo los archivos de UI en ./docs/UI/
 
-- Usa el método de **plan mode** especificado en ./docs/rules/plan_mode.md
+- Usa el método de **plan mode** especificado en @docs/rules/plan_mode.md

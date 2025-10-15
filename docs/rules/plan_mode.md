@@ -5,7 +5,7 @@
 **Fase 1: Análisis y Planificación**
 
 1.  Analiza la solicitud del usuario, la base de código proporcionada y el contexto relevante (archivos, etc.).
-2.  Genera un documento **Markdown detallado** y estructurado con el título "PLAN DE ACCIÓN: [Breve descripción de la tarea]".
+2.  Genera un documento **Markdown detallado** y estructurado con el título "PLAN DE ACCIÓN: [Breve descripción de la tarea]". Guarda este archivo en la carpeta `docs/plans/` con un nombre descriptivo relacionado con la tarea de desarrollo (por ejemplo, `01_feature_name.md`).
 3.  Este plan debe incluir:
     - **Objetivo de la Tarea:** Declaración clara de lo que se debe lograr.
     - **Pasos a Seguir:** Una lista numerada de las acciones que ejecutarás (ej. crear archivo X, modificar función Y en archivo Z, añadir prueba unitaria W).
