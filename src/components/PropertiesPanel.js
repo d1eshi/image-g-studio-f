@@ -1,34 +1,30 @@
-import { appState } from '../state/appState.js';
+import { generateDetailedPrompt } from "../api/gemini.js";
 
-export function PropertiesPanelComponent(element) {
-  const inputs = {
-    character: {
-      name: element.querySelector('#char-name'),
-      type: element.querySelector('#char-type'),
-      action: element.querySelector('#char-action'),
-      emotion: element.querySelector('#char-emotion'),
-    },
-    camera: {
-      lens: element.querySelector('#cam-lens'),
-      movement: element.querySelector('#cam-movement'),
-      duration: element.querySelector('#cam-duration'),
-    },
-    scene: {
-      environment: element.querySelector('#scene-environment'),
-    },
-  };
+const generatePromptBtn = document.getElementById("generatePromptBtn");
+const aiPromptTextarea = document.getElementById("aiPrompt");
 
-  function bindInputs() {
-    for (const category in inputs) {
-      for (const prop in inputs[category]) {
-        const inputElement = inputs[category][prop];
-        inputElement.addEventListener('change', () => {
-          appState[category][prop] = inputElement.value;
-        });
-      }
-    }
-  }
+async function handleGeneratePrompt() {
+  const sceneName = document.getElementById("sceneName").value;
+  const sceneStyle = document.getElementById("sceneStyle").value;
+  const charModel = document.getElementById("charModel").value;
+  const charEmotion = document.getElementById("charEmotion").value;
+  const charAction = document.getElementById("charAction").value;
+  const cameraShot = document.getElementById("cameraShot").value;
+  const cameraMovement = document.getElementById("cameraMovement").value;
 
-  bindInputs();
-  console.log('PropertiesPanelComponent initialized');
+  const userQuery = `Generate a detailed video prompt based on these elements:\n- Scene Name: ${sceneName}\n- Visual Style: ${sceneStyle}\n- Character: ${charModel}\n- Character's Emotion: ${charEmotion}\n- Character's Action: ${charAction}\n- Camera Shot: ${cameraShot}\n- Camera Movement: ${cameraMovement}`;
+
+  generatePromptBtn.disabled = true;
+  generatePromptBtn.textContent = "Generando...";
+  aiPromptTextarea.value = "Contactando a la IA...";
+
+  const prompt = await generateDetailedPrompt(userQuery);
+  aiPromptTextarea.value = prompt;
+
+  generatePromptBtn.disabled = false;
+  generatePromptBtn.innerHTML = "✨ Sugerir Prompt Detallado";
+}
+
+export function initializePropertiesPanel() {
+  generatePromptBtn.addEventListener("click", handleGeneratePrompt);
 }

@@ -1,52 +1,67 @@
-import { models } from "../state.js";
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modalTitle");
+const modalContent = document.getElementById("modalContent");
+const modalText = document.getElementById("modalText");
+const modalActions = document.getElementById("modalActions");
+const closeModalBtn = document.getElementById("closeModalBtn");
 
-/**
- * Creates and injects the model selector into the DOM.
- * @param {HTMLElement} container The element to inject the selector into.
- * @returns {string} The ID of the default selected model.
- */
-export function createModelSelector(container) {
-  const selectorHtml = `
-          <div class="model-selector">
-              <button type="button" class="model-selector-btn" id="modelSelectorBtn">
-                  <span>Elige tu modelo</span>
-              </button>
-              <div class="model-selector-dropdown" id="modelSelectorDropdown">
-                  ${models
-                    .map(
-                      (model) => `
-                      <div class="model-selector-option" data-model-id="${model.id}">
-                          <h4>${model.name}</h4>
-                          <p>${model.description}</p>
-                      </div>
-                  `,
-                    )
-                    .join("")}
-              </div>
-          </div>
-      `;
-  container.innerHTML = selectorHtml;
+const videoPlayerModal = document.getElementById("videoPlayerModal");
+const videoPlayerTitle = document.getElementById("videoPlayerTitle");
+const videoPlayerImage = document.getElementById("videoPlayerImage");
+const closeVideoPlayerBtn = document.getElementById("closeVideoPlayerBtn");
 
-  // Set default model
-  const defaultModel = models[0];
-  document.querySelector("#modelSelectorBtn span").textContent = defaultModel.name;
-  return defaultModel.id;
+const clipsContainer = document.getElementById("clipsContainer");
+
+export function initializeModals() {
+  closeModalBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  closeVideoPlayerBtn.addEventListener("click", () => videoPlayerModal.classList.add("hidden"));
+  videoPlayerModal.addEventListener("click", (e) => {
+    if (e.target === videoPlayerModal) {
+      videoPlayerModal.classList.add("hidden");
+    }
+  });
 }
 
-/**
- * Adds a video card to the gallery grid.
- * @param {HTMLElement} grid The gallery grid element.
- * @param {object} video The video object to add.
- */
-export function addVideoToGallery(grid, video) {
-  const videoCard = document.createElement("div");
-  videoCard.classList.add("video-card");
-  videoCard.innerHTML = `
-          <a href="${video.url}" target="_blank">
-              <img src="${video.previewUrl}" alt="${video.title}">
-              <h3>${video.title}</h3>
-              <p>${video.createdAt.toLocaleDateString()}</p>
-          </a>
-      `;
-  grid.appendChild(videoCard);
+export function showModal(title, isLoading = true, message = "Tu video se está procesando...") {
+  modalTitle.textContent = title;
+  if (isLoading) {
+    modalContent.innerHTML = `<div class="loader"></div>`;
+    modalText.textContent = message;
+    modalText.classList.remove("text-red-500");
+    modalActions.classList.add("hidden");
+  } else {
+    modalContent.innerHTML = ``;
+    modalText.textContent = message;
+    modalText.classList.add("text-red-500");
+    modalActions.classList.remove("hidden");
+  }
+  modal.classList.remove("hidden");
+}
+
+export function hideModal() {
+  modal.classList.add("hidden");
+}
+
+function showVideoPlayerModal(imageUrl, sceneName) {
+  videoPlayerTitle.textContent = sceneName;
+  videoPlayerImage.src = imageUrl;
+  videoPlayerModal.classList.remove("hidden");
+}
+
+export function addClipToUI(imageData, sceneName) {
+  const clipEl = document.createElement("div");
+  clipEl.className = "bg-surface border border-border rounded-lg overflow-hidden group clip-card";
+  clipEl.innerHTML = `
+    <div class="aspect-video bg-gray-200 flex items-center justify-center pointer-events-none">
+        <img src="${imageData}" alt="${sceneName}" class="w-full h-full object-cover"/>
+    </div>
+    <div class="p-3 pointer-events-none">
+      <p class="text-sm font-medium text-text-primary truncate">${sceneName}</p>
+      <p class="text-xs text-text-secondary">Justo ahora - AI Generated</p>
+    </div>
+  `;
+  clipEl.addEventListener("click", () => {
+    showVideoPlayerModal(imageData, sceneName);
+  });
+  clipsContainer.prepend(clipEl);
 }

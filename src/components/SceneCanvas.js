@@ -1,105 +1,128 @@
-import { appState } from '../state/appState.js';
+const canvas = document.getElementById("editorCanvas");
+const ctx = canvas.getContext("2d");
 
-export function SceneCanvasComponent(element) {
-  const canvas = element.querySelector('#scene-canvas');
-  const ctx = canvas.getContext('2d');
+const character = {
+  x: 200,
+  y: 250,
+  radius: 20,
+  color: "var(--accent)",
+  label: "Character",
+};
+const camera = {
+  x: 450,
+  y: 250,
+  size: 30,
+  color: "var(--text-primary)",
+  label: "Camera",
+};
+let dragging = null;
+let dragOffsetX, dragOffsetY;
 
-  let dragging = null;
+function resizeCanvas() {
+  const parent = canvas.parentElement;
+  canvas.width = parent.clientWidth;
+  canvas.height = parent.clientHeight;
+  draw();
+}
 
-  function resizeCanvas() {
-    canvas.width = element.clientWidth;
-    canvas.height = element.clientHeight;
-    render();
+function drawCamera(x, y, size) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x, y - size / 2);
+  ctx.lineTo(x - size, y + size / 2);
+  ctx.lineTo(x + size, y + size / 2);
+  ctx.closePath();
+  ctx.strokeStyle = camera.color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawCharacter(x, y, radius) {
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = character.color;
+  ctx.fill();
+}
+
+function drawConnectionLine() {
+  ctx.beginPath();
+  ctx.moveTo(character.x, character.y);
+  ctx.lineTo(camera.x, camera.y);
+  ctx.strokeStyle = "var(--connection-line)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawLabels() {
+  ctx.fillStyle = "var(--text-secondary)";
+  ctx.font = "12px Inter";
+  ctx.textAlign = "center";
+  ctx.fillText(character.label, character.x, character.y + character.radius + 15);
+  ctx.fillText(camera.label, camera.x, camera.y + camera.size / 2 + 15);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawConnectionLine();
+  drawCamera(camera.x, camera.y, camera.size);
+  drawCharacter(character.x, character.y, character.radius);
+  drawLabels();
+}
+
+function getMousePos(evt) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+}
+
+function isMouseOverCharacter(pos) {
+  const dx = pos.x - character.x;
+  const dy = pos.y - character.y;
+  return dx * dx + dy * dy < character.radius * character.radius;
+}
+
+function isMouseOverCamera(pos) {
+  const halfSize = camera.size;
+  return (
+    pos.x > camera.x - halfSize &&
+    pos.x < camera.x + halfSize &&
+    pos.y > camera.y - camera.size / 2 &&
+    pos.y < camera.y + camera.size / 2
+  );
+}
+
+function onMouseDown(e) {
+  const pos = getMousePos(e);
+  if (isMouseOverCharacter(pos)) {
+    dragging = character;
+  } else if (isMouseOverCamera(pos)) {
+    dragging = camera;
   }
-
-  function drawCharacter() {
-    const { position, name } = appState.character;
-    ctx.fillStyle = '#4A90E2';
-    ctx.beginPath();
-    ctx.arc(position.x, position.y, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    ctx.fillText(name, position.x, position.y + 30);
+  if (dragging) {
+    dragOffsetX = pos.x - dragging.x;
+    dragOffsetY = pos.y - dragging.y;
   }
+}
 
-  function drawCamera() {
-    const { position } = appState.camera;
-    const charPosition = appState.character.position;
-
-    ctx.save();
-    ctx.translate(position.x, position.y);
-
-    const angle = Math.atan2(charPosition.y - position.y, charPosition.x - position.x);
-    ctx.rotate(angle);
-
-    ctx.fillStyle = '#E24A4A';
-    ctx.beginPath();
-    ctx.moveTo(-15, -15);
-    ctx.lineTo(20, 0);
-    ctx.lineTo(-15, 15);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.restore();
+function onMouseMove(e) {
+  const pos = getMousePos(e);
+  if (dragging) {
+    dragging.x = pos.x - dragOffsetX;
+    dragging.y = pos.y - dragOffsetY;
+    draw();
   }
+  canvas.style.cursor = isMouseOverCharacter(pos) || isMouseOverCamera(pos) ? "grab" : "default";
+}
 
-  function drawLine() {
-    const { position: camPos } = appState.camera;
-    const { position: charPos } = appState.character;
+function onMouseUp() {
+  dragging = null;
+  canvas.style.cursor = "default";
+}
 
-    ctx.strokeStyle = '#999';
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(camPos.x, camPos.y);
-    ctx.lineTo(charPos.x, charPos.y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawLine();
-    drawCharacter();
-    drawCamera();
-  }
-
-  function getMousePos(evt) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top,
-    };
-  }
-
-  function isInside(pos, obj) {
-    return Math.sqrt((pos.x - obj.position.x) ** 2 + (pos.y - obj.position.y) ** 2) < 20;
-  }
-
-  canvas.addEventListener('mousedown', (e) => {
-    const mousePos = getMousePos(e);
-    if (isInside(mousePos, appState.character)) {
-      dragging = 'character';
-    } else if (isInside(mousePos, appState.camera)) {
-      dragging = 'camera';
-    }
-  });
-
-  canvas.addEventListener('mousemove', (e) => {
-    if (dragging) {
-      const mousePos = getMousePos(e);
-      appState[dragging].position.x = mousePos.x;
-      appState[dragging].position.y = mousePos.y;
-      render();
-    }
-  });
-
-  canvas.addEventListener('mouseup', () => {
-    dragging = null;
-  });
-
-  window.addEventListener('resize', resizeCanvas);
+export function initializeCanvas() {
+  canvas.addEventListener("mousedown", onMouseDown);
+  canvas.addEventListener("mousemove", onMouseMove);
+  canvas.addEventListener("mouseup", onMouseUp);
+  window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
-
-  console.log('SceneCanvasComponent initialized');
 }
