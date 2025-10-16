@@ -1,4 +1,4 @@
-import { generateDetailedPrompt } from "../api/gemini.js";
+import { generateEnhancedPrompt } from "../api/providers/gemini.js";
 
 const generatePromptBtn = document.getElementById("generatePromptBtn");
 const aiPromptTextarea = document.getElementById("aiPrompt");
@@ -18,7 +18,11 @@ async function handleGeneratePrompt() {
   generatePromptBtn.textContent = "Generando...";
   aiPromptTextarea.value = "Contactando a la IA...";
 
-  const prompt = await generateDetailedPrompt(userQuery);
+  const prompt = await generateEnhancedPrompt(
+    userQuery,
+    sceneStyle,
+    "gemini-1.5-flash",
+  );
   aiPromptTextarea.value = prompt;
 
   generatePromptBtn.disabled = false;
