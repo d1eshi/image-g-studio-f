@@ -1,16 +1,39 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(API_KEY);
+
 /**
- * Simulates a call to a Gemini-like API to enhance the user's prompt.
+ * Generates content using a specified Gemini model.
+ * @param {string} modelName - The name of the model to use (e.g., "gemini-1.5-flash").
+ * @param {string} prompt - The prompt to send to the model.
+ * @returns {Promise<string>} The generated text.
+ */
+async function generateContent(modelName, prompt) {
+  try {
+    const model = genAI.getGenerativeModel({ model: modelName });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    return text;
+  } catch (error) {
+    console.error(`Error generating content with ${modelName}:`, error);
+    return `Error generating content. Please check the console for details.`;
+  }
+}
+
+/**
+ * Enhances the user's prompt using a Gemini model.
  * @param {string} idea The user's initial idea.
  * @param {string} style The selected video style.
  * @param {string} model The selected AI model.
  * @returns {Promise<string>} A promise that resolves to the enhanced prompt.
  */
-export function generateEnhancedPrompt(idea, style, model) {
+export async function generateEnhancedPrompt(idea, style, model) {
   console.log(
     `Generating with: Idea='${idea}', Style='${style}', Model='${model}'`,
   );
 
-  // This is a meta-prompt to guide the AI.
   const metaPrompt = `
           You are an expert prompt engineer for a text-to-video AI model like Sora.
           Your task is to take a user's simple idea and a desired style and expand it into a detailed, cinematic prompt.
@@ -22,13 +45,5 @@ export function generateEnhancedPrompt(idea, style, model) {
           Generate the detailed prompt now.
       `;
 
-  // --- SIMULATED API CALL ---
-  // In a real application, you would send 'metaPrompt' to the selected Gemini model's API.
-  // Here, we just simulate a response for demonstration purposes.
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const enhancedPrompt = `A cinematic, ${style} shot of a scene inspired by "${idea}". The camera slowly pans across the landscape, revealing intricate details. The lighting is dramatic, casting long shadows and highlighting the main subject. The mood is epic and awe-inspiring, with a color palette that enhances the emotional tone of the video.`;
-      resolve(enhancedPrompt);
-    }, 1000); // Simulate network delay
-  });
+  return await generateContent(model, metaPrompt);
 }
